@@ -1,0 +1,79 @@
+Compound Query:
+    là nhóm truy vấn bao bọc hoặc kết hợp nhiều truy vấn khác lại với nhau bằng các điều kiện như
+    AND, NOT, FILTER, ...
+
+    Các loại Compund query chính:
+    1. bool
+        Kết hợp các truy vấn con bằng must, should (có thể khớp, có thể nâng điểm),
+         filter, must_not (không được khớp)
+
+         {
+           "query": {
+             "bool": {
+               "must": [
+                 { "match": { "title": "iphone" } }
+               ],
+               "filter": [
+                 { "term": { "category": "phone" } }
+               ],
+               "must_not": [
+                 { "term": { "status": "out_of_stock" } }
+               ],
+               "should": [
+                 { "term": { "brand": "apple" } }
+               ]
+             }
+           }
+         }
+
+    2. dis_max: trả về điểm cao nhất trong số các truy vấn con
+        Ví dụ:
+            {
+              "query": {
+                "dis_max": {
+                  "queries": [
+                    { "match": { "title": "apple" } },
+                    { "match": { "description": "apple" } }
+                  ]
+                }
+              }
+            }
+
+    3. boosting: tăng/giảm điểm theo điều kiện
+        Ví dụ: giảm 0.5 điểm nếu khớp với điều kiện negative
+            {
+              "query": {
+                "boosting": {
+                  "positive": { "match": { "title": "iphone" } },
+                  "negative": { "term": { "status": "out_of_stock" } },
+                  "negative_boost": 0.5
+                }
+              }
+            }
+
+    4. constant_score: gán điểm cố định
+        Ví dụ: filter -> True -> gán điểm bằng 1.5
+        {
+          "query": {
+            "constant_score": {
+              "filter": { "term": { "status": "active" } },
+              "boost": 1.5
+            }
+          }
+        }
+
+    5. hybrid query: kết hợp giữa truy vấn tính điểm và truy vấn lọc
+        Ví dụ:
+            {
+              "query": {
+                "bool": {
+                  "must": [
+                    { "match": { "title": "samsung" } }
+                  ],
+                  "filter": [
+                    { "term": { "status": "active" } },
+                    { "range": { "price": { "lte": 1000 } } }
+                  ]
+                }
+              }
+            }
