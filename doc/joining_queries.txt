@@ -1,0 +1,89 @@
+Joining query
+    cho phép liên kết các document liên quan. Ví dụ: đơn hàng <-> khách hàng, bình luân <-> bài viết, log <-> phiên đăng nhập
+
+    1. nested: join các object lồng bên trong document cha
+        Ví dụ:
+            {
+              "product": "iPhone",
+              "reviews": [
+                { "user": "Alice", "stars": 5 },
+                { "user": "Bob", "stars": 3 }
+              ]
+            }
+            {
+              "query": {
+                "nested": {
+                  "path": "reviews",
+                  "query": {
+                    "bool": {
+                      "must": [
+                        { "match": { "reviews.user": "Alice" } },
+                        { "match": { "reviews.stars": 5 } }
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+
+    2. has_child/has_parent: cần khai báo mapping giữa các document trước khi thực hiện truy vấn
+        Ví dụ:
+            + Mapping cha-con:
+                {
+                  "mappings": {
+                    "properties": {
+                      "join_field": {
+                        "type": "join",
+                        "relations": {
+                          "blog": "comment"
+                        }
+                      }
+                    }
+                  }
+                }
+
+            + has_child: tìm blog có comment chứa từ "awesome"
+                {
+                  "query": {
+                    "has_child": {
+                      "type": "comment",
+                      "query": {
+                        "match": { "content": "awesome" }
+                      }
+                    }
+                  }
+                }
+            + has_parent: tìm comment thuộc blog có title = "Tech"
+                {
+                  "query": {
+                    "has_parent": {
+                      "parent_type": "blog",
+                      "query": {
+                        "match": { "title": "Tech" }
+                      }
+                    }
+                  }
+                }
+
+    3. terms lookup: tra cúu giá trị từ document khác
+        Ví dụ:
+            index: user_preferencé
+                {
+                  "_id": "user_123",
+                  "favorite_categories": ["phone", "laptop", "tablet"]
+                }
+
+            index: product
+            -> tìm tất cả các sản phần trong product có category nằm trong danh sách user_123
+                {
+                  "query": {
+                    "terms": {
+                      "category": {
+                        "index": "user_preferences",
+                        "id": "user_123",
+                        "path": "favorite_categories"
+                      }
+                    }
+                  }
+                }
+
