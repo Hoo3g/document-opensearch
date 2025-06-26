@@ -1,0 +1,2 @@
+Filter Context chỉ kiếm tra đúng/sai, không tính điểm (_score)
+    + dùng phổ biến trong bool, constain_score, aggregation, must_not, should
