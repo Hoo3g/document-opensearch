@@ -1,0 +1,40 @@
+Query:
+    1. match:
+        + match: tìm văn bản gần đúng
+
+        + match_phrase: tìm cụm từ chính xác (đúng thứ tự)
+
+        + match_phrase_prefix: tìm cụm từ có tiền tố cuối. ví dụ:
+            match_phrase_prefix: { "title": "samsung g" }
+
+        + multi_match: tìm nhiều trường text một lúc.
+            multi_match: { "query": "laptop", "fields": ["title", "description"] }
+
+	    + common_terms: bỏ qua từ phổ biến.
+	        common: { "content": { "query": "the quick brown fox" } }, bỏ qua "the".
+
+	    + query_string: tìm kiếm kết hợp.
+	        query_string: { "query": "title:samsung AND price:[100 TO 500]" }
+
+	    + simple_query_string: giống query_string nhưng k lỗi nếu cú pháp sai
+
+    2. term:
+        + term: tìm kiếm chính xác, không phân tích
+        + terms: tìm trong danh sách giá trị, tương đương IN trong SQL
+            {
+              "terms": {
+                "status": ["active", "pending", "archived"]  : tìm status nằm ở một trong các giá trị
+              }
+            }
+
+        + range: tìm khoảng, áp dụng cho date, numberic
+
+        + exists: kiểm tra field có tồn tại không
+
+        + prefix: tìm chuỗi bắt đầu bằng tiền tố
+
+        + wildcard: tìm bằng kí tự đại diện *, ?
+            ví dụ: tìm các email kết thúc bằng @gmail.com
+                wildcard: { "email.keyword": "*@gmail.com" }
+
+        + regexp: dùng regex để tìm, không phân tích, hiệu năng thấp
